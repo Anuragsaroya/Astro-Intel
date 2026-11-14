@@ -14,6 +14,12 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -54,77 +60,35 @@
             </div>
 
             <ul class="hero-metrics" aria-label="Mission metrics">
-              <li>
-                <strong data-count="24">0</strong>
-                <span>Landing zones</span>
-              </li>
-              <li>
-                <strong data-count="87">0</strong>
-                <span>Route health</span>
-              </li>
-              <li>
-                <strong data-count="12">0</strong>
-                <span>Fresh alerts</span>
-              </li>
+              <li><strong data-count="24">0</strong><span>Landing zones</span></li>
+              <li><strong data-count="87">0</strong><span>Route health</span></li>
+              <li><strong data-count="12">0</strong><span>Fresh alerts</span></li>
             </ul>
           </div>
 
           <div class="hero-panel reveal">
             <div class="orbit-card" id="orbitalCard">
-              <div class="card-header">
-                <span class="status-dot"></span>
-                <span>Surface telemetry</span>
-              </div>
-
+              <div class="card-header"><span class="status-dot"></span><span>Surface telemetry</span></div>
               <div class="planet-view">
                 <div class="planet-glow"></div>
                 <div class="planet-surface"></div>
                 <div class="satellite"></div>
               </div>
-
               <div class="telemetry-grid">
-                <div>
-                  <label>Temp</label>
-                  <strong>-70°C</strong>
-                </div>
-                <div>
-                  <label>Radiation</label>
-                  <strong>Low</strong>
-                </div>
-                <div>
-                  <label>Wind</label>
-                  <strong>18 km/h</strong>
-                </div>
-                <div>
-                  <label>Water ice</label>
-                  <strong>22%</strong>
-                </div>
+                <div><label>Temp</label><strong>-70°C</strong></div>
+                <div><label>Radiation</label><strong>Low</strong></div>
+                <div><label>Wind</label><strong>18 km/h</strong></div>
+                <div><label>Water ice</label><strong>22%</strong></div>
               </div>
             </div>
           </div>
         </section>
 
         <section class="mission-stats container reveal" id="missions">
-          <article class="stat-card">
-            <p>Current objective</p>
-            <h3>Jezero Traverse</h3>
-            <span>Route optimized for safety and data yield</span>
-          </article>
-          <article class="stat-card">
-            <p>Terrain risk</p>
-            <h3>6.4 / 10</h3>
-            <span>Stable, with low dust exposure</span>
-          </article>
-          <article class="stat-card">
-            <p>Suit reserves</p>
-            <h3>82%</h3>
-            <span>Battery + thermal control nominal</span>
-          </article>
-          <article class="stat-card">
-            <p>Comm relay</p>
-            <h3>99.2%</h3>
-            <span>Strong uplink across all sectors</span>
-          </article>
+          <article class="stat-card"><p>Current objective</p><h3>Jezero Traverse</h3><span>Route optimized for safety and data yield</span></article>
+          <article class="stat-card"><p>Terrain risk</p><h3>6.4 / 10</h3><span>Stable, with low dust exposure</span></article>
+          <article class="stat-card"><p>Suit reserves</p><h3>82%</h3><span>Battery + thermal control nominal</span></article>
+          <article class="stat-card"><p>Comm relay</p><h3>99.2%</h3><span>Strong uplink across all sectors</span></article>
         </section>
 
         <section class="globe-section container reveal" aria-labelledby="mars-globe-title">
@@ -132,7 +96,6 @@
             <p class="eyebrow accent">Mission map</p>
             <h3 id="mars-globe-title">Mars surface intelligence</h3>
           </div>
-
           <div class="globe-wrapper">
             <div class="mars-globe" id="marsGlobe" aria-label="Interactive Mars globe">
               <div class="globe-orbit orbit-one"></div>
@@ -142,18 +105,9 @@
               <button class="globe-marker marker-two" type="button">Jezero</button>
               <button class="globe-marker marker-three" type="button">Olympus</button>
             </div>
-
             <div class="globe-sidebar">
-              <div class="globe-panel">
-                <span class="chip">Airlock</span>
-                <h4>Ice-dense corridor</h4>
-                <p>High-confidence route for a short-field EVA with low dust agitation and strong thermal stability.</p>
-              </div>
-              <div class="globe-panel">
-                <span class="chip">Risk</span>
-                <h4>Moderate exposure</h4>
-                <p>Surface winds remain elevated near the ridge line, but mission planners rate the route as viable.</p>
-              </div>
+              <div class="globe-panel"><span class="chip">Airlock</span><h4>Ice-dense corridor</h4><p>High-confidence route for a short-field EVA with low dust agitation and strong thermal stability.</p></div>
+              <div class="globe-panel"><span class="chip">Risk</span><h4>Moderate exposure</h4><p>Surface winds remain elevated near the ridge line, but mission planners rate the route as viable.</p></div>
             </div>
           </div>
         </section>
@@ -163,105 +117,44 @@
             <p class="eyebrow accent">Route planning</p>
             <h3>Mission corridor overview</h3>
           </div>
-
           <div class="route-grid">
             <div class="map-card">
-              <div class="map-surface">
-                <span class="waypoint w1"></span>
-                <span class="waypoint w2"></span>
-                <span class="waypoint w3"></span>
-                <span class="route-line"></span>
+              <div id="marsRouteMap" class="mars-route-map" role="application" aria-label="Interactive Mars map with mission route and landing-site markers">
+                <div class="map-fallback">Loading Mars map tiles…</div>
               </div>
+              <p class="map-attribution-note">Basemap: NASA/JPL/USGS Mars Trek. Drag to pan, scroll to zoom, and select a marker for site details.</p>
             </div>
-
             <div class="route-insights">
-              <div>
-                <label>Planned path</label>
-                <strong>4.8 km</strong>
-              </div>
-              <div>
-                <label>Estimated duration</label>
-                <strong>03h 42m</strong>
-              </div>
-              <div>
-                <label>Hazard index</label>
-                <strong>Moderate</strong>
-              </div>
-              <div>
-                <label>Water prospecting</label>
-                <strong>Priority zone</strong>
-              </div>
+              <div><label>Planned path</label><strong>4.8 km</strong></div>
+              <div><label>Estimated duration</label><strong>03h 42m</strong></div>
+              <div><label>Hazard index</label><strong>Moderate</strong></div>
+              <div><label>Water prospecting</label><strong>Priority zone</strong></div>
             </div>
           </div>
         </section>
 
         <section class="dashboard-section container reveal" id="insights">
-          <div class="section-head">
-            <p class="eyebrow accent">Operational insights</p>
-            <h3>Data layers driving the next EVA window</h3>
-          </div>
-
+          <div class="section-head"><p class="eyebrow accent">Operational insights</p><h3>Data layers driving the next EVA window</h3></div>
           <div class="dashboard-grid">
-            <article class="insight-card">
-              <span class="chip">Terrain</span>
-              <h4>High-confidence ridge</h4>
-              <p>Stable scan data supports a safer eastbound climb with minimal rockfall exposure.</p>
-            </article>
-            <article class="insight-card">
-              <span class="chip">Radiation</span>
-              <h4>Solar flare watch</h4>
-              <p>Short-term activity remains low, but crews should minimize time in exposed sections.</p>
-            </article>
-            <article class="insight-card">
-              <span class="chip">Resource</span>
-              <h4>Ice extraction</h4>
-              <p>Water ice concentration is highest near the ridgeline, creating a favorable resource lane.</p>
-            </article>
+            <article class="insight-card"><span class="chip">Terrain</span><h4>High-confidence ridge</h4><p>Stable scan data supports a safer eastbound climb with minimal rockfall exposure.</p></article>
+            <article class="insight-card"><span class="chip">Radiation</span><h4>Solar flare watch</h4><p>Short-term activity remains low, but crews should minimize time in exposed sections.</p></article>
+            <article class="insight-card"><span class="chip">Resource</span><h4>Ice extraction</h4><p>Water ice concentration is highest near the ridgeline, creating a favorable resource lane.</p></article>
           </div>
-
           <div class="mission-board">
-            <div class="board-panel">
-              <h4>Mission checklist</h4>
-              <ul>
-                <li class="done">Thermal check complete</li>
-                <li class="done">Navigation uplink confirmed</li>
-                <li class="active">Surface dust mitigation in progress</li>
-                <li>Airlock seal inspection pending</li>
-              </ul>
-            </div>
-            <div class="board-panel board-panel--accent">
-              <h4>Commander brief</h4>
-              <p>
-                Low-risk execution window opens in 42 minutes. Maintain caution on the north ridge and preserve power reserve for return transit.
-              </p>
-            </div>
+            <div class="board-panel"><h4>Mission checklist</h4><ul><li class="done">Thermal check complete</li><li class="done">Navigation uplink confirmed</li><li class="active">Surface dust mitigation in progress</li><li>Airlock seal inspection pending</li></ul></div>
+            <div class="board-panel board-panel--accent"><h4>Commander brief</h4><p>Low-risk execution window opens in 42 minutes. Maintain caution on the north ridge and preserve power reserve for return transit.</p></div>
           </div>
         </section>
 
         <section class="briefing container reveal" id="briefing">
           <div class="briefing-card">
-            <div>
-              <p class="eyebrow accent">Mission briefing</p>
-              <h3>Request a custom EVA report</h3>
-            </div>
-
+            <div><p class="eyebrow accent">Mission briefing</p><h3>Request a custom EVA report</h3></div>
             <form class="brief-form" id="briefForm">
               <div class="field-row">
-                <label>
-                  Mission Name
-                  <input type="text" name="mission" placeholder="Ares-42" required />
-                </label>
-                <label>
-                  Crew Lead
-                  <input type="text" name="leader" placeholder="Commander Vega" required />
-                </label>
+                <label>Mission Name<input type="text" name="mission" placeholder="Ares-42" required /></label>
+                <label>Crew Lead<input type="text" name="leader" placeholder="Commander Vega" required /></label>
               </div>
-
-              <label>
-                Mission notes
-                <textarea name="notes" placeholder="Summarize the route, risk level, and target zone..." required></textarea>
-              </label>
-
+              <label>Mission notes<textarea name="notes" placeholder="Summarize the route, risk level, and target zone..." required></textarea></label>
               <button type="submit" class="form-btn">Submit brief</button>
               <p class="form-status" id="formStatus" aria-live="polite"></p>
             </form>
@@ -270,6 +163,11 @@
       </main>
     </div>
 
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script src="script.js"></script>
   </body>
 </html>
