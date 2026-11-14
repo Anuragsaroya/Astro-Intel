@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marswalk Mission Control</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#101722;--panel:#182233;--ink:#e9e1d1;--mute:#9aa6b8;--route:#7fd3e6;--warn:#f2b84b;--bad:#e0675a;--ok:#6fcf97;--line:#2b394f}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}
+#app{display:grid;grid-template-columns:390px 1fr;height:100%}
+aside{padding:12px 14px;overflow:auto;background:var(--panel);border-right:1px solid var(--line)}
+h1{font-size:20px;margin:0}
+.note{background:var(--bg);border-left:4px solid var(--warn);padding:6px 8px;margin:8px 0;font-size:12px;color:var(--mute)}
+details{border-top:1px solid var(--line);padding:6px 0}
+summary{cursor:pointer;font-weight:600;padding:4px 0}
+label{display:block;margin:6px 0 2px;font-size:12px;color:var(--mute)}
+select,input[type=number]{width:100%;padding:5px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+input[type=range]{width:100%}
+.row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:3px 0}
+.row b{font-weight:600;text-align:right}
+.al{display:flex;gap:8px;padding:4px 6px;margin:3px 0;border-radius:6px;background:var(--bg);border-left:4px solid var(--mute)}
+.al b{min-width:42px}.al span{color:var(--mute);margin-left:auto;text-align:right}
+.ok{border-color:var(--ok)}.warn{border-color:var(--warn)}.bad{border-color:var(--bad)}
+#verdict{font-size:16px;font-weight:700;padding:8px;border-radius:6px;background:var(--bg);border-left:6px solid var(--mute);margin:6px 0}
+#bar{height:12px;border-radius:6px;margin:4px 0 2px}
+.lg{display:flex;justify-content:space-between;font-size:12px;color:var(--mute)}
+button{padding:6px 10px;margin:6px 6px 0 0;background:var(--route);color:#07202a;border:0;border-radius:6px;font-weight:600;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+#map{height:100%;background:#000}
+@media(max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:50% 50%}#map{order:-1}aside{border-right:0}}
+</style>
+</head>
+<body>
+<div id="app">
+<aside>
+  <h1>Marswalk Mission Control</h1>
+  <div class="note">Basemap: NASA/JPL Mars Trek. Terrain, hazards, radiation, temperature and water signal are <b>synthetic demo fields</b> shaped like the real thing. Replace them with real grids (see code comment).</div>
+
+  <details open><summary>1. Heatmap layer</summary>
+    <label for="lay">Show</label>
+    <select id="lay">
+      <option value="risk">Combined risk</option>
+      <option value="slope">Steep slopes (°)</option>
+      <option value="dust">Loose dust risk</option>
+      <option value="boul">Boulder density</option>
+      <option value="rad">Radiation (mSv/h)</option>
+      <option value="temp">Surface temperature (°C)</option>
+      <option value="ice">Water signal (demo)</option>
+      <option value="sci">Science value</option>
+      <option value="elev">Elevation (m)</option>
+    </select>
+    <label for="op">Heatmap opacity</label><input id="op" type="range" min="0" max="100" value="65">
+    <div id="bar"></div><div class="lg"><span id="lo"></span><span id="hi"></span></div>
+    <label><input id="blk" type="checkbox" checked> Mark cells this vehicle cannot cross (red)</label>
+  </details>
+
+  <details open><summary>2. Climate and threats</summary>
+    <label for="hr">Local solar time: <b id="hrv"></b></label><input id="hr" type="range" min="0" max="24" step="0.25" value="8">
+    <label for="tau">Dust storm strength (opacity τ): <b id="tauv"></b></label><input id="tau" type="range" min="0.3" max="5" step="0.1" value="0.6">
+    <label><input id="spe" type="checkbox"> Solar particle event (radiation spike)</label>
+    <div class="row"><span>Air temperature at base</span><b id="tb"></b></div>
+    <div class="row"><span>Solar power at base</span><b id="sp"></b></div>
+  </details>
+
+  <details open><summary>3. Mission plan</summary>
+    <label for="mode">Explorer</label>
+    <select id="mode"><option value="foot">Astronaut on foot</option><option value="rover">Pressurized rover</option></select>
+    <label for="tgt">Target</label><select id="tgt"></select>
+    <label for="click">Map click sets</label>
+    <select id="click"><option value="t">Target</option><option value="s">Start (base)</option></select>
+    <label for="lam">Route style: <b id="lamv"></b></label><input id="lam" type="range" min="0" max="100" value="50">
+    <label for="dwell">Time at target (minutes)</label><input id="dwell" type="number" value="60" min="0" step="10">
+    <button id="exp">Export route</button>
+  </details>
+
+  <details open><summary>4. Go / no-go</summary>
+    <div id="verdict"></div>
+    <div id="alerts"></div>
+    <div class="row"><span>Round-trip distance</span><b id="m1"></b></div>
+    <div class="row"><span>Total time outside</span><b id="m2"></b></div>
+    <div class="row"><span>Oxygen left</span><b id="m3"></b></div>
+    <div class="row"><span>Power left</span><b id="m4"></b></div>
+    <div class="row"><span>Radiation dose</span><b id="m5"></b></div>
+    <div class="row"><span>Steepest slope / hazard share</span><b id="m6"></b></div>
+    <div class="row"><span>Science score per hour outside</span><b id="m7"></b></div>
+  </details>
+
+  <details open><summary>5. Satellite relay passes</summary>
+    <p class="note">Simplified circular-orbit model, not live. Use NASA SPICE or JPL Horizons data for real passes.</p>
+    <div id="passes"></div>
+  </details>
+</aside>
+<div id="map"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const R = 3389.5, rad = Math.PI / 180, $ = id => document.getElementById(id);
+const B = { s: 18.30, n: 18.62, w: 77.20, e: 77.60 }, N = 64;          // study area (Jezero) and grid size
+const CW = (B.e - B.w) / N * rad * R * Math.cos(18.46 * rad), CH = (B.n - B.s) / N * rad * R; // cell size in km
+const BASE = [18.4447, 77.4508];
+
+// Science targets: replace with your own picks. v = science value 0-1
+const TARGETS = [
+  { n: 'Delta front', p: [18.46, 77.36], v: 1.0, why: 'River delta sediments, best chance to find past life signs' },
+  { n: 'Hydrated clay outcrop (demo)', p: [18.52, 77.30], v: 0.8, why: 'Clay minerals form in water' },
+  { n: 'Subsurface water signal (demo)', p: [18.38, 77.52], v: 0.7, why: 'Demo ice or hydrated-mineral signal' },
+  { n: 'Crater rim breccia (demo)', p: [18.58, 77.25], v: 0.6, why: 'Ancient deep crust blocks' }
+];
+
+// Vehicle models. v = km/h, o2 = hours of oxygen, pw = Wh, load = W, heatK = W per degree below -40
+const MODES = {
+  foot:  { v: 2, maxSlope: 12, o2: 8,  pw: 1500,  load: 150, heatK: 4,  foot: 1 },
+  rover: { v: 8, maxSlope: 20, o2: 72, pw: 12000, load: 900, heatK: 20, foot: 0 }
+};
+const LIM = { cold: -75, reserve: 0.25, dose: 0.25 };   // demo limits: change them and explain why
+
+// ---------- synthetic terrain and hazard fields ----------
+function hash(x, y, s) { const h = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return h - Math.floor(h); }
+function vn(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash(xi, yi, s), b = hash(xi + 1, yi, s), c = hash(xi, yi + 1, s), d = hash(xi + 1, yi + 1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+const fbm = (x, y, s) => .55 * vn(x, y, s) + .3 * vn(x * 2, y * 2, s + 1) + .15 * vn(x * 4, y * 4, s + 2);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ll = i => [B.n - ((i / N | 0) + .5) / N * (B.n - B.s), B.w + (i % N + .5) / N * (B.e - B.w)];
+const idx = p => clamp(Math.floor((B.n - p[0]) / (B.n - B.s) * N), 0, N - 1) * N + clamp(Math.floor((p[1] - B.w) / (B.e - B.w) * N), 0, N - 1);
+const gauss = (p, q, s) => Math.exp(-((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2) / (2 * s * s));
+
+const F = {}; ['elev', 'slope', 'dust', 'boul', 'rad', 'ice', 'sci', 'risk'].forEach(k => F[k] = new Float32Array(N * N));
+function generate() {
+  // TO USE REAL DATA: after this function runs, overwrite F.elev, F.slope, F.dust, F.boul, F.rad, F.ice, F.sci
+  // with Float32Array(N*N) values built from MOLA, HiRISE, CTX, SHARAD, RAD. Row 0 is the north edge.
+  for (let i = 0; i < N * N; i++) {
+    const [lat, lon] = ll(i), x = (i % N) / N * 5, y = (i / N | 0) / N * 5;
+    F.elev[i] = -2650 + 380 * clamp((lat - 18.5) / .12) ** 2 + 250 * clamp((77.28 - lon) / .08) ** 2
+      + 120 * fbm(x, y, 1) + 75 * vn(x * 8, y * 8, 9) + 110 / (1 + Math.exp((lon - 77.38) / .006));
+  }
+  let lo = Infinity, hi = -Infinity; F.elev.forEach(v => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+  for (let i = 0; i < N * N; i++) {
+    const r = i / N | 0, c = i % N, [lat, lon] = ll(i), x = c / N * 5, y = r / N * 5;
+    const gx = (F.elev[r * N + Math.min(N - 1, c + 1)] - F.elev[r * N + Math.max(0, c - 1)]) / (2000 * CW);
+    const gy = (F.elev[Math.min(N - 1, r + 1) * N + c] - F.elev[Math.max(0, r - 1) * N + c]) / (2000 * CH);
+    const s = Math.atan(Math.hypot(gx, gy)) / rad, en = (F.elev[i] - lo) / (hi - lo);
+    F.slope[i] = s;
+    F.dust[i] = clamp((.6 * fbm(x * 1.3, y * 1.3, 4) + .5 * (1 - en)) * (s < 8 ? 1 : .35));
+    F.boul[i] = clamp(.55 * fbm(x * 1.7, y * 1.7, 6) + s / 45);
+    F.rad[i] = .027 * (.9 + .25 * en) * (1 + .04 * vn(x * 3, y * 3, 8));            // mSv per hour, demo
+    F.ice[i] = clamp(.85 * gauss([lat, lon], TARGETS[2].p, .05) + .2 * fbm(x, y, 11));
+    F.sci[i] = clamp(TARGETS.reduce((a, t) => a + t.v * gauss([lat, lon], t.p, .035), 0));
+  }
+  let rl = Infinity, rh = -Infinity; F.rad.forEach(v => { rl = Math.min(rl, v); rh = Math.max(rh, v); });
+  for (let i = 0; i < N * N; i++)
+    F.risk[i] = clamp(.4 * F.slope[i] / 20 + .25 * F.dust[i] + .25 * F.boul[i] + .1 * (F.rad[i] - rl) / (rh - rl || 1));
+}
+generate();
+
+// ---------- climate model ----------
+const tauNow = () => +$('tau').value;
+function tempAt(h, i) {   // surface temperature in C: day/night swing, damped by dust, cooler at height
+  const swing = 32 * clamp(1 - .15 * (tauNow() - .6), .35, 1.2);
+  return -50 + swing * Math.cos((h - 14) / 24 * 2 * Math.PI) - .0025 * (F.elev[i] + 2650);
+}
+const sunAt = h => Math.max(0, Math.sin((h - 6) / 12 * Math.PI)) * Math.exp(-.4 * (tauNow() - .5));
+
+// ---------- map ----------
+const map = L.map('map', { crs: L.CRS.EPSG4326, minZoom: 2, maxZoom: 12, zoomControl: true });
+function tile(name, mz) {
+  return L.tileLayer('https://trek.nasa.gov/tiles/Mars/EQ/' + name + '/1.0.0/default/default028mm/{z}/{y}/{x}.jpg',
+    { maxNativeZoom: mz, maxZoom: 12, noWrap: true, zoomOffset: 0, attribution: 'NASA/JPL Mars Trek' });
+}
+tile('Mars_Viking_MDIM21_ClrMosaic_global_232m', 7).addTo(map);
+const mola = tile('Mars_MGS_MOLA_ClrShade_merge_global_463m', 6).setOpacity(.5);
+const bounds = [[B.s, B.w], [B.n, B.e]];
+const hm = document.createElement('canvas'), bc = document.createElement('canvas');
+hm.width = hm.height = bc.width = bc.height = N;
+const heat = L.imageOverlay(hm.toDataURL(), bounds, { opacity: .65 }).addTo(map);
+const blocked = L.imageOverlay(bc.toDataURL(), bounds, { opacity: .8 }).addTo(map);
+const routeL = L.polyline([], { color: '#7fd3e6', weight: 4 }).addTo(map);
+const satL = L.layerGroup().addTo(map), mk = L.layerGroup().addTo(map);
+L.control.layers(null, { 'MOLA elevation': mola, 'Heatmap': heat, 'Blocked cells': blocked, 'Satellites': satL }, { collapsed: true }).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
+map.fitBounds(bounds);
+
+// ---------- heatmap drawing ----------
+const RAMPS = { cool: [[68, 1, 84], [59, 82, 139], [33, 145, 140], [94, 201, 98], [253, 231, 37]],
+                hot: [[18, 27, 45], [110, 50, 120], [214, 69, 80], [251, 176, 59], [252, 255, 164]] };
+const LAYERS = { risk: ['hot', ''], slope: ['hot', '°'], dust: ['hot', ''], boul: ['hot', ''], rad: ['hot', ' mSv/h'],
+                 temp: ['cool', ' °C'], ice: ['cool', ''], sci: ['cool', ''], elev: ['cool', ' m'] };
+function col(r, t) {
+  const a = RAMPS[r], k = clamp(t) * (a.length - 1), i = Math.min(a.length - 2, Math.floor(k)), f = k - i;
+  return a[i].map((v, j) => v + (a[i + 1][j] - v) * f);
+}
+function drawHeat() {
+  const k = $('lay').value, [ramp, u] = LAYERS[k], hr = +$('hr').value;
+  const a = k === 'temp' ? Float32Array.from(F.elev, (_, i) => tempAt(hr, i)) : F[k];
+  let lo = Infinity, hi = -Infinity; a.forEach(v => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+  const g = hm.getContext('2d'), im = g.createImageData(N, N);
+  for (let i = 0; i < N * N; i++) im.data.set([...col(ramp, (a[i] - lo) / (hi - lo || 1)), 255], i * 4);
+  g.putImageData(im, 0, 0); heat.setUrl(hm.toDataURL()); heat.setOpacity($('op').value / 100);
+  $('lo').textContent = lo.toFixed(2) + u; $('hi').textContent = hi.toFixed(2) + u;
+  $('bar').style.background = 'linear-gradient(90deg,' + RAMPS[ramp].map(c => 'rgb(' + c + ')') + ')';
+  const M = MODES[$('mode').value], b = bc.getContext('2d'), bi = b.createImageData(N, N);
+  for (let i = 0; i < N * N; i++) if (isBlocked(i, M)) bi.data.set([224, 70, 60, 170], i * 4);
+  b.putImageData(bi, 0, 0); blocked.setUrl(bc.toDataURL());
+  $('blk').checked ? blocked.addTo(map) : map.removeLayer(blocked);
+}
+
+// ---------- routing and resource simulation ----------
+const isBlocked = (i, M) => F.slope[i] > M.maxSlope || F.boul[i] > .85;
+const speedF = (i, M) => Math.max(.2, (1 - F.slope[i] / (M.maxSlope * 1.6)) * (1 - .35 * F.dust[i]) * (1 - .3 * F.boul[i]) * (1 - .06 * (tauNow() - .5)));
+const cellDist = (a, b) => Math.hypot((b % N - a % N) * CW, ((b / N | 0) - (a / N | 0)) * CH);
+
+function plan(s, t, M) {
+  const lam = $('lam').value / 100, d = new Float32Array(N * N).fill(Infinity), prev = new Int32Array(N * N).fill(-1), done = new Uint8Array(N * N);
+  d[s] = 0;
+  for (let k = 0; k < N * N; k++) {
+    let u = -1, best = Infinity;
+    for (let i = 0; i < N * N; i++) if (!done[i] && d[i] < best) { best = d[i]; u = i; }
+    if (u < 0 || u === t) break;
+    done[u] = 1;
+    const r = u / N | 0, c = u % N;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const rr = r + dr, cc = c + dc;
+      if ((!dr && !dc) || rr < 0 || cc < 0 || rr >= N || cc >= N) continue;
+      const v = rr * N + cc;
+      if (done[v] || isBlocked(v, M)) continue;
+      const w = cellDist(u, v) * ((1 - lam) / speedF(v, M) + lam * (1 + 6 * F.risk[v]));
+      if (d[u] + w < d[v]) { d[v] = d[u] + w; prev[v] = u; }
+    }
+  }
+  const p = []; for (let u = t; u >= 0; u = prev[u]) { p.push(u); if (u === s) break; }
+  return p[p.length - 1] === s ? p.reverse() : null;
+}
+
+function simulate(path, M) {
+  const hr0 = +$('hr').value, spe = $('spe').checked ? 40 : 1, dwell = (+$('dwell').value || 0) / 60;
+  let t = hr0, o2 = 0, pw = 0, dose = 0, km = 0, minT = 99, maxS = 0, haz = 0, sci = F.sci[path[path.length - 1]];
+  const step = (i, h) => {
+    const T = tempAt(t, i); minT = Math.min(minT, T);
+    o2 += h * (M.foot ? 1 + F.slope[i] / 30 : 1);
+    pw += h * (M.load + Math.max(0, -40 - T) * M.heatK);
+    dose += h * F.rad[i] * spe; t += h;
+  };
+  const seq = path.concat(path.slice(0, -1).reverse());
+  for (let k = 1; k < seq.length; k++) {
+    const a = seq[k - 1], b = seq[k], d = cellDist(a, b);
+    km += d; step(b, d / (M.v * speedF(b, M))); maxS = Math.max(maxS, F.slope[b]);
+    if (F.dust[b] > .6 || F.boul[b] > .6) haz += d;
+    if (k === path.length - 1 && dwell) step(b, dwell);
+  }
+  return { km, hrs: t - hr0, hr0, o2, pw, dose, minT, maxS, haz: km ? haz / km : 0, sci };
+}
+
+// ---------- satellites (simplified circular orbits) ----------
+const OMEGA = 360 / 24.6229;   // Mars rotation in degrees per hour
+const SATS = [
+  { n: 'MRO', i: 93.2, P: 1.87, l0: 20, u0: 0, c: '#ffd166' },
+  { n: 'Odyssey', i: 93.1, P: 1.97, l0: 200, u0: 90, c: '#ef8354' },
+  { n: 'MAVEN', i: 75, P: 4.5, l0: 100, u0: 180, c: '#c77dff' }
+];
+function satPos(s, t) {
+  const u = s.u0 * rad + 2 * Math.PI * t / s.P, lat = Math.asin(Math.sin(s.i * rad) * Math.sin(u)) / rad;
+  const lon = s.l0 + Math.atan2(Math.cos(s.i * rad) * Math.sin(u), Math.cos(u)) / rad - OMEGA * t;
+  return [lat, ((lon + 540) % 360) - 180];
+}
+function gc(a, b) {
+  return Math.acos(clamp(Math.sin(a[0] * rad) * Math.sin(b[0] * rad) + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.cos((a[1] - b[1]) * rad), -1, 1)) / rad;
+}
+function passes(site) {
+  const out = [];
+  SATS.forEach(s => {
+    let on = null;
+    for (let t = 0; t <= 48; t += .02) {
+      const near = gc(satPos(s, t), site) < 20;
+      if (near && on === null) on = t;
+      if (!near && on !== null) { out.push({ n: s.n, a: on, b: t }); on = null; }
+    }
+  });
+  return out.sort((x, y) => x.a - y.a);
+}
+function drawSats(t) {
+  satL.clearLayers();
+  SATS.forEach(s => {
+    let seg = [], prev = null;
+    for (let u = t - 3; u <= t + 3; u += .02) {
+      const p = satPos(s, u);
+      if (prev && Math.abs(p[1] - prev[1]) > 180) { L.polyline(seg, { color: s.c, weight: 2, opacity: .8 }).addTo(satL); seg = []; }
+      seg.push(p); prev = p;
+    }
+    L.polyline(seg, { color: s.c, weight: 2, opacity: .8 }).addTo(satL);
+    L.circleMarker(satPos(s, t), { radius: 6, color: s.c, fillOpacity: 1 }).bindTooltip(s.n).addTo(satL);
+  });
+}
+
+// ---------- UI and update loop ----------
+const fmt = h => String(Math.floor(h % 24)).padStart(2, '0') + ':' + String(Math.floor(h % 1 * 60)).padStart(2, '0');
+let startI = idx(BASE), targI = idx(TARGETS[0].p), lastPath = null;
+$('tgt').innerHTML = TARGETS.map((t, i) => '<option value="' + i + '">' + t.n + '</option>').join('') + '<option value="c">Custom (map click)</option>';
+
+function alert(name, level, text) {
+  const w = { ok: 'OK', warn: 'Watch', bad: 'Stop' }[level];
+  return '<div class="al ' + level + '"><b>' + w + '</b>' + name + '<span>' + text + '</span></div>';
+}
+function update() {
+  const M = MODES[$('mode').value], hr = +$('hr').value, tau = tauNow();
+  $('hrv').textContent = fmt(hr); $('tauv').textContent = tau.toFixed(1);
+  $('lamv').textContent = $('lam').value < 34 ? 'fastest' : $('lam').value > 66 ? 'safest' : 'balanced';
+  $('tb').textContent = tempAt(hr, startI).toFixed(0) + ' °C';
+  $('sp').textContent = Math.round(sunAt(hr) * 100) + '% of clear-sky peak';
+  drawHeat(); drawSats(hr);
+
+  mk.clearLayers();
+  L.circleMarker(ll(startI), { radius: 8, color: '#fff', fillColor: '#7fd3e6', fillOpacity: 1 }).bindTooltip('Base').addTo(mk);
+  TARGETS.forEach(t => L.marker(t.p).bindPopup('<b>' + t.n + '</b><br>' + t.why).addTo(mk));
+  if ($('tgt').value === 'c') L.circleMarker(ll(targI), { radius: 7, color: '#f2b84b' }).bindTooltip('Custom target').addTo(mk);
+
+  const path = plan(startI, targI, M); lastPath = path;
+  const site = ll(startI), ps = passes(site);
+  $('passes').innerHTML = ps.filter(p => p.b > hr).slice(0, 5).map(p =>
+    '<div class="row"><span>' + p.n + '</span><b>' + fmt(p.a) + ' to ' + fmt(p.b) + '</b></div>').join('') || 'No passes found.';
+  if (!path) {
+    routeL.setLatLngs([]);
+    $('verdict').textContent = 'No-go: no safe path for this vehicle'; $('verdict').style.borderColor = '#e0675a';
+    $('alerts').innerHTML = ''; ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7'].forEach(k => $(k).textContent = '-'); return;
+  }
+  routeL.setLatLngs(path.map(ll));
+  const r = simulate(path, M), o2f = 1 - r.o2 / M.o2, pwf = 1 - r.pw / M.pw;
+  const relay = ps.some(p => p.a < r.hr0 + r.hrs && p.b > r.hr0);
+  const lvl = (frac) => frac >= LIM.reserve + .1 ? 'ok' : frac >= LIM.reserve ? 'warn' : 'bad';
+  const rows = [
+    ['Extreme cold', r.minT > LIM.cold + 10 ? 'ok' : r.minT > LIM.cold ? 'warn' : 'bad', r.minT.toFixed(0) + ' °C coldest'],
+    ['Dust storm', tau < 2 ? 'ok' : tau < 3.5 ? 'warn' : 'bad', 'τ = ' + tau.toFixed(1)],
+    ['Radiation', r.dose < LIM.dose * .6 ? 'ok' : r.dose < LIM.dose ? 'warn' : 'bad', r.dose.toFixed(2) + ' mSv of ' + LIM.dose],
+    ['Oxygen', lvl(o2f), Math.round(o2f * 100) + '% left'],
+    ['Power', lvl(pwf), Math.round(pwf * 100) + '% left'],
+    ['Relay satellite', relay ? 'ok' : 'warn', relay ? 'pass during EVA' : 'no pass during EVA']
+  ];
+  $('alerts').innerHTML = rows.map(x => alert(...x)).join('');
+  const worst = rows.some(x => x[1] === 'bad') ? 'bad' : rows.some(x => x[1] === 'warn') ? 'warn' : 'ok';
+  $('verdict').textContent = { ok: 'Go', warn: 'Go with caution', bad: 'No-go' }[worst];
+  $('verdict').style.borderColor = { ok: '#6fcf97', warn: '#f2b84b', bad: '#e0675a' }[worst];
+  $('m1').textContent = r.km.toFixed(1) + ' km'; $('m2').textContent = r.hrs.toFixed(1) + ' h';
+  $('m3').textContent = (M.o2 - r.o2).toFixed(1) + ' of ' + M.o2 + ' h'; $('m4').textContent = Math.round(M.pw - r.pw) + ' of ' + M.pw + ' Wh';
+  $('m5').textContent = r.dose.toFixed(3) + ' mSv'; $('m6').textContent = r.maxS.toFixed(0) + '° / ' + Math.round(r.haz * 100) + '%';
+  $('m7').textContent = (r.sci * 10 / r.hrs).toFixed(1);
+}
+
+map.on('click', e => {
+  const i = idx([e.latlng.lat, e.latlng.lng]);
+  if (e.latlng.lat < B.s || e.latlng.lat > B.n || e.latlng.lng < B.w || e.latlng.lng > B.e) return;
+  if ($('click').value === 's') startI = i; else { targI = i; $('tgt').value = 'c'; }
+  update();
+});
+$('tgt').onchange = () => { if ($('tgt').value !== 'c') targI = idx(TARGETS[+$('tgt').value].p); update(); };
+document.querySelectorAll('input,select').forEach(el => { if (el.id !== 'tgt') el.oninput = update; });
+$('exp').onclick = () => {
+  if (!lastPath) return;
+  const gj = { type: 'Feature', properties: { name: 'Marswalk route' }, geometry: { type: 'LineString', coordinates: lastPath.map(i => ll(i).reverse()) } };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(gj, null, 2)], { type: 'application/json' }));
+  a.download = 'marswalk-route.geojson'; a.click();
+};
+update();
+</script>
+</body>
+</html>

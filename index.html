@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Explorer | 3D Martian Map</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+<header>
+    <h1>🚀 MARS EXPLORER</h1>
+    <p>Explore the Red Planet in 3D</p>
+</header>
+
+<main>
+
+    <section class="welcome">
+        <h2>Discover Mars</h2>
+        <p>
+            Explore the surface of Mars, discover important locations
+            and learn about the Red Planet.
+        </p>
+    </section>
+
+    <section class="globe-section">
+        <h2>🌎 Interactive 3D Mars Globe</h2>
+        <p class="hint">
+            Drag to rotate • Scroll to zoom • Click a marker to explore
+        </p>
+
+        <div id="mars-container">
+            <p id="loading-message">Loading 3D Mars...</p>
+        </div>
+
+        <p id="globe-status" class="status">
+            Preparing Mars Globe...
+        </p>
+    </section>
+
+    <section class="search-box">
+        <h2>🔍 Search Mars Locations</h2>
+
+        <div class="search-row">
+            <input
+                type="text"
+                id="searchMars"
+                placeholder="Try Olympus Mons or Jezero Crater">
+
+            <button id="searchButton">Search</button>
+        </div>
+
+        <p id="search-result"></p>
+    </section>
+
+    <section class="locations">
+        <h2>📍 Important Locations on Mars</h2>
+
+        <div class="location-grid">
+
+            <div class="card">
+                <h3>Olympus Mons</h3>
+                <p>The largest known volcano in our solar system.</p>
+                <button class="explore-button" data-location="Olympus Mons">
+                    Explore Location
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>Valles Marineris</h3>
+                <p>A gigantic canyon system on Mars.</p>
+                <button class="explore-button" data-location="Valles Marineris">
+                    Explore Location
+                </button>
+            </div>
+
+            <div class="card">
+                <h3>Jezero Crater</h3>
+                <p>A crater explored by NASA's Perseverance rover.</p>
+                <button class="explore-button" data-location="Jezero Crater">
+                    Explore Location
+                </button>
+            </div>
+
+        </div>
+
+        <div id="location-info" class="info-panel">
+            <h3>Explore a Mars Location</h3>
+            <p>Select a marker or location above to see its details.</p>
+        </div>
+    </section>
+
+    <section class="map-box">
+    <h2>🪐 Explore NASA Mars Trek</h2>
+
+    <p>
+        Explore the official NASA Mars map in a separate tab.
+    </p>
+
+    <a
+        href="https://trek.nasa.gov/mars/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nasa-button">
+        Open NASA Mars Trek 🚀
+    </a>
+</section>
+
+    <section class="about">
+        <h2>About Mars Explorer</h2>
+        <p>
+            Mars Explorer is an educational project that helps users
+            explore Mars through a 3D globe, location markers,
+            coordinates and NASA map resources.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 Mars Explorer | NASA Space Apps Challenge Project</p>
+</footer>
+
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
