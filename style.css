@@ -37,6 +37,8 @@ img {
 }
 
 button,
+input,
+textarea,
 a {
   font: inherit;
 }
@@ -120,7 +122,8 @@ a {
 
 .nav-cta,
 .primary-btn,
-.secondary-btn {
+.secondary-btn,
+.form-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +134,8 @@ a {
 }
 
 .nav-cta,
-.primary-btn {
+.primary-btn,
+.form-btn {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #062332;
   box-shadow: 0 12px 32px rgba(58, 181, 255, 0.38);
@@ -144,7 +148,8 @@ a {
 }
 
 .primary-btn,
-.secondary-btn {
+.secondary-btn,
+.form-btn {
   padding: 14px 20px;
   font-weight: 700;
 }
@@ -157,7 +162,8 @@ a {
 
 .nav-cta:hover,
 .primary-btn:hover,
-.secondary-btn:hover {
+.secondary-btn:hover,
+.form-btn:hover {
   transform: translateY(-2px);
 }
 
@@ -314,7 +320,9 @@ a {
 
 .stat-card,
 .insight-card,
-.globe-panel {
+.globe-panel,
+.board-panel,
+.briefing-card {
   border-radius: 20px;
   border: 1px solid var(--line);
   background: rgba(12, 25, 35, 0.86);
@@ -369,6 +377,12 @@ a {
   box-shadow: inset -30px -20px 40px rgba(44, 17, 9, 0.7), 0 0 60px rgba(226, 120, 59, 0.25);
   transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition: transform 0.2s ease-out;
+  animation: spin 20s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) rotateZ(0deg); }
+  100% { transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) rotateZ(360deg); }
 }
 
 .globe-core::before,
@@ -418,6 +432,11 @@ a {
   cursor: pointer;
 }
 
+.globe-marker.active {
+  background: rgba(113, 211, 255, 0.2);
+  border-color: rgba(113, 211, 255, 0.8);
+}
+
 .marker-one { top: 22%; left: 18%; }
 .marker-two { top: 52%; right: 18%; }
 .marker-three { bottom: 18%; left: 44%; }
@@ -443,7 +462,8 @@ a {
 }
 
 .route-panel,
-.insights {
+.dashboard-section,
+.briefing {
   margin-top: 56px;
 }
 
@@ -537,7 +557,7 @@ a {
   font-size: 1.25rem;
 }
 
-.insight-grid {
+.dashboard-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
@@ -571,6 +591,119 @@ a {
   color: var(--muted);
 }
 
+.mission-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.board-panel {
+  padding: 22px 20px;
+}
+
+.board-panel h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.4rem;
+}
+
+.board-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  color: var(--muted);
+}
+
+.board-panel li {
+  position: relative;
+  padding-left: 26px;
+}
+
+.board-panel li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+}
+
+.board-panel li.done::before {
+  background: var(--success);
+}
+
+.board-panel li.active::before {
+  background: var(--sun);
+  box-shadow: 0 0 16px rgba(255, 187, 92, 0.7);
+}
+
+.board-panel--accent {
+  background: linear-gradient(135deg, rgba(18, 38, 56, 0.9), rgba(12, 21, 32, 0.9));
+}
+
+.board-panel--accent p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.briefing-card {
+  display: grid;
+  gap: 24px;
+  padding: 26px 24px;
+}
+
+.brief-form {
+  display: grid;
+  gap: 18px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(9, 18, 26, 0.9);
+  color: var(--text);
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+.form-btn {
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.form-status {
+  min-height: 22px;
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--success);
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -597,9 +730,11 @@ a {
 
   .hero,
   .route-grid,
-  .insight-grid,
+  .dashboard-grid,
   .mission-stats,
-  .globe-wrapper {
+  .globe-wrapper,
+  .mission-board,
+  .field-row {
     grid-template-columns: 1fr;
   }
 
@@ -631,7 +766,8 @@ a {
     justify-content: center;
   }
 
-  .nav-cta {
+  .nav-cta,
+  .form-btn {
     width: 100%;
   }
 

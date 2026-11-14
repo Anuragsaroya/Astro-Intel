@@ -32,9 +32,10 @@
           <a href="#missions">Missions</a>
           <a href="#route-planning">Route</a>
           <a href="#insights">Insights</a>
+          <a href="#briefing">Briefing</a>
         </nav>
 
-        <button class="nav-cta">Launch Brief</button>
+        <button class="nav-cta" type="button">Launch Brief</button>
       </header>
 
       <main>
@@ -194,13 +195,13 @@
           </div>
         </section>
 
-        <section class="insights container reveal" id="insights">
+        <section class="dashboard-section container reveal" id="insights">
           <div class="section-head">
             <p class="eyebrow accent">Operational insights</p>
             <h3>Data layers driving the next EVA window</h3>
           </div>
 
-          <div class="insight-grid">
+          <div class="dashboard-grid">
             <article class="insight-card">
               <span class="chip">Terrain</span>
               <h4>High-confidence ridge</h4>
@@ -216,6 +217,54 @@
               <h4>Ice extraction</h4>
               <p>Water ice concentration is highest near the ridgeline, creating a favorable resource lane.</p>
             </article>
+          </div>
+
+          <div class="mission-board">
+            <div class="board-panel">
+              <h4>Mission checklist</h4>
+              <ul>
+                <li class="done">Thermal check complete</li>
+                <li class="done">Navigation uplink confirmed</li>
+                <li class="active">Surface dust mitigation in progress</li>
+                <li>Airlock seal inspection pending</li>
+              </ul>
+            </div>
+            <div class="board-panel board-panel--accent">
+              <h4>Commander brief</h4>
+              <p>
+                Low-risk execution window opens in 42 minutes. Maintain caution on the north ridge and preserve power reserve for return transit.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="briefing container reveal" id="briefing">
+          <div class="briefing-card">
+            <div>
+              <p class="eyebrow accent">Mission briefing</p>
+              <h3>Request a custom EVA report</h3>
+            </div>
+
+            <form class="brief-form" id="briefForm">
+              <div class="field-row">
+                <label>
+                  Mission Name
+                  <input type="text" name="mission" placeholder="Ares-42" required />
+                </label>
+                <label>
+                  Crew Lead
+                  <input type="text" name="leader" placeholder="Commander Vega" required />
+                </label>
+              </div>
+
+              <label>
+                Mission notes
+                <textarea name="notes" placeholder="Summarize the route, risk level, and target zone..." required></textarea>
+              </label>
+
+              <button type="submit" class="form-btn">Submit brief</button>
+              <p class="form-status" id="formStatus" aria-live="polite"></p>
+            </form>
           </div>
         </section>
       </main>

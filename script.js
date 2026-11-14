@@ -79,3 +79,19 @@ if (marsGlobe) {
     });
   });
 }
+
+const briefForm = document.getElementById('briefForm');
+const formStatus = document.getElementById('formStatus');
+
+if (briefForm && formStatus) {
+  briefForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(briefForm);
+    const mission = formData.get('mission') || 'Mission';
+    const leader = formData.get('leader') || 'Crew lead';
+
+    formStatus.textContent = `Brief queued for ${mission} with ${leader}. Mission control will review the EVA plan.`;
+    briefForm.reset();
+  });
+}
