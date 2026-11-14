@@ -1,29 +1,21 @@
-# Welcome to your Lovable project
+# Astro Intel
 
-This project was built with [Lovable](https://lovable.dev).
+Astro Intel is a mission-control inspired website for planning safer Mars exploration routes, monitoring key environmental conditions, and highlighting operational insights for future EVA missions.
 
-## Build with Lovable
+## Run locally
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Open `index.html` directly in a browser, or serve it with any static site server.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+Example:
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+python3 -m http.server 8000
 ```
 
-## Built with
+Then visit `http://localhost:8000`.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+## Notes
+
+- The project is intentionally kept lightweight and static for fast deployment.
+- Duplicate generated files were removed from active use and the app now centers on the website landing page in `index.html`.
+- The design uses a space-themed dashboard layout and simple JavaScript interactions for counters and reveal animations.

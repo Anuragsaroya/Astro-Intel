@@ -1,138 +1,195 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mars Explorer | 3D Martian Map</title>
-
-    <link rel="stylesheet" href="style.css">
-
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-        }
-    }
-    </script>
-</head>
-
-<body>
-
-<header>
-    <h1>🚀 MARS EXPLORER</h1>
-    <p>Explore the Red Planet in 3D</p>
-</header>
-
-<main>
-
-    <section class="welcome">
-        <h2>Discover Mars</h2>
-        <p>
-            Explore the surface of Mars, discover important locations
-            and learn about the Red Planet.
-        </p>
-    </section>
-
-    <section class="globe-section">
-        <h2>🌎 Interactive 3D Mars Globe</h2>
-        <p class="hint">
-            Drag to rotate • Scroll to zoom • Click a marker to explore
-        </p>
-
-        <div id="mars-container">
-            <p id="loading-message">Loading 3D Mars...</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Astro Intel is a mission control-inspired landing page for Mars exploration planning, route intelligence, and mission telemetry."
+    />
+    <title>Astro Intel | Mission Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-mark">AI</div>
+          <div>
+            <p class="eyebrow">Mission intelligence</p>
+            <h1>Astro Intel</h1>
+          </div>
         </div>
 
-        <p id="globe-status" class="status">
-            Preparing Mars Globe...
-        </p>
-    </section>
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="#overview">Overview</a>
+          <a href="#missions">Missions</a>
+          <a href="#route-planning">Route</a>
+          <a href="#insights">Insights</a>
+        </nav>
 
-    <section class="search-box">
-        <h2>🔍 Search Mars Locations</h2>
+        <button class="nav-cta">Launch Brief</button>
+      </header>
 
-        <div class="search-row">
-            <input
-                type="text"
-                id="searchMars"
-                placeholder="Try Olympus Mons or Jezero Crater">
+      <main>
+        <section class="hero container" id="overview">
+          <div class="hero-copy reveal">
+            <p class="eyebrow accent">Mars operations dashboard</p>
+            <h2>Plan safer missions across the Red Planet.</h2>
+            <p class="lead">
+              Monitor terrain risk, route viability, radiation, weather, and habitat
+              readiness from a single mission control interface built for future EVA teams.
+            </p>
 
-            <button id="searchButton">Search</button>
-        </div>
-
-        <p id="search-result"></p>
-    </section>
-
-    <section class="locations">
-        <h2>📍 Important Locations on Mars</h2>
-
-        <div class="location-grid">
-
-            <div class="card">
-                <h3>Olympus Mons</h3>
-                <p>The largest known volcano in our solar system.</p>
-                <button class="explore-button" data-location="Olympus Mons">
-                    Explore Location
-                </button>
+            <div class="hero-actions">
+              <a class="primary-btn" href="#missions">Explore mission data</a>
+              <a class="secondary-btn" href="#route-planning">View route profile</a>
             </div>
 
-            <div class="card">
-                <h3>Valles Marineris</h3>
-                <p>A gigantic canyon system on Mars.</p>
-                <button class="explore-button" data-location="Valles Marineris">
-                    Explore Location
-                </button>
+            <ul class="hero-metrics" aria-label="Mission metrics">
+              <li>
+                <strong data-count="24">0</strong>
+                <span>Landing zones</span>
+              </li>
+              <li>
+                <strong data-count="87">0</strong>
+                <span>Route health</span>
+              </li>
+              <li>
+                <strong data-count="12">0</strong>
+                <span>Fresh alerts</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hero-panel reveal">
+            <div class="orbit-card">
+              <div class="card-header">
+                <span class="status-dot"></span>
+                <span>Surface telemetry</span>
+              </div>
+
+              <div class="planet-view">
+                <div class="planet-glow"></div>
+                <div class="planet-surface"></div>
+                <div class="satellite"></div>
+              </div>
+
+              <div class="telemetry-grid">
+                <div>
+                  <label>Temp</label>
+                  <strong>-70°C</strong>
+                </div>
+                <div>
+                  <label>Radiation</label>
+                  <strong>Low</strong>
+                </div>
+                <div>
+                  <label>Wind</label>
+                  <strong>18 km/h</strong>
+                </div>
+                <div>
+                  <label>Water ice</label>
+                  <strong>22%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mission-stats container reveal" id="missions">
+          <article class="stat-card">
+            <p>Current objective</p>
+            <h3>Jezero Traverse</h3>
+            <span>Route optimized for safety and data yield</span>
+          </article>
+          <article class="stat-card">
+            <p>Terrain risk</p>
+            <h3>6.4 / 10</h3>
+            <span>Stable, with low dust exposure</span>
+          </article>
+          <article class="stat-card">
+            <p>Suit reserves</p>
+            <h3>82%</h3>
+            <span>Battery + thermal control nominal</span>
+          </article>
+          <article class="stat-card">
+            <p>Comm relay</p>
+            <h3>99.2%</h3>
+            <span>Strong uplink across all sectors</span>
+          </article>
+        </section>
+
+        <section class="route-panel container reveal" id="route-planning">
+          <div class="section-head">
+            <p class="eyebrow accent">Route planning</p>
+            <h3>Mission corridor overview</h3>
+          </div>
+
+          <div class="route-grid">
+            <div class="map-card">
+              <div class="map-surface">
+                <span class="waypoint w1"></span>
+                <span class="waypoint w2"></span>
+                <span class="waypoint w3"></span>
+                <span class="route-line"></span>
+              </div>
             </div>
 
-            <div class="card">
-                <h3>Jezero Crater</h3>
-                <p>A crater explored by NASA's Perseverance rover.</p>
-                <button class="explore-button" data-location="Jezero Crater">
-                    Explore Location
-                </button>
+            <div class="route-insights">
+              <div>
+                <label>Planned path</label>
+                <strong>4.8 km</strong>
+              </div>
+              <div>
+                <label>Estimated duration</label>
+                <strong>03h 42m</strong>
+              </div>
+              <div>
+                <label>Hazard index</label>
+                <strong>Moderate</strong>
+              </div>
+              <div>
+                <label>Water prospecting</label>
+                <strong>Priority zone</strong>
+              </div>
             </div>
+          </div>
+        </section>
 
-        </div>
+        <section class="insights container reveal" id="insights">
+          <div class="section-head">
+            <p class="eyebrow accent">Operational insights</p>
+            <h3>Data layers driving the next EVA window</h3>
+          </div>
 
-        <div id="location-info" class="info-panel">
-            <h3>Explore a Mars Location</h3>
-            <p>Select a marker or location above to see its details.</p>
-        </div>
-    </section>
+          <div class="insight-grid">
+            <article class="insight-card">
+              <span class="chip">Terrain</span>
+              <h4>High-confidence ridge</h4>
+              <p>Stable scan data supports a safer eastbound climb with minimal rockfall exposure.</p>
+            </article>
+            <article class="insight-card">
+              <span class="chip">Radiation</span>
+              <h4>Solar flare watch</h4>
+              <p>Short-term activity remains low, but crews should minimize time in exposed sections.</p>
+            </article>
+            <article class="insight-card">
+              <span class="chip">Resource</span>
+              <h4>Ice extraction</h4>
+              <p>Water ice concentration is highest near the ridgeline, creating a favorable resource lane.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
 
-    <section class="map-box">
-    <h2>🪐 Explore NASA Mars Trek</h2>
-
-    <p>
-        Explore the official NASA Mars map in a separate tab.
-    </p>
-
-    <a
-        href="https://trek.nasa.gov/mars/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="nasa-button">
-        Open NASA Mars Trek 🚀
-    </a>
-</section>
-
-    <section class="about">
-        <h2>About Mars Explorer</h2>
-        <p>
-            Mars Explorer is an educational project that helps users
-            explore Mars through a 3D globe, location markers,
-            coordinates and NASA map resources.
-        </p>
-    </section>
-
-</main>
-
-<footer>
-    <p>© 2026 Mars Explorer | NASA Space Apps Challenge Project</p>
-</footer>
-
-<script type="module" src="script.js"></script>
-
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
