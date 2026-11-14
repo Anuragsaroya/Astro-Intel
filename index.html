@@ -69,7 +69,7 @@
           </div>
 
           <div class="hero-panel reveal">
-            <div class="orbit-card">
+            <div class="orbit-card" id="orbitalCard">
               <div class="card-header">
                 <span class="status-dot"></span>
                 <span>Surface telemetry</span>
@@ -124,6 +124,37 @@
             <h3>99.2%</h3>
             <span>Strong uplink across all sectors</span>
           </article>
+        </section>
+
+        <section class="globe-section container reveal" aria-labelledby="mars-globe-title">
+          <div class="section-head">
+            <p class="eyebrow accent">Mission map</p>
+            <h3 id="mars-globe-title">Mars surface intelligence</h3>
+          </div>
+
+          <div class="globe-wrapper">
+            <div class="mars-globe" id="marsGlobe" aria-label="Interactive Mars globe">
+              <div class="globe-orbit orbit-one"></div>
+              <div class="globe-orbit orbit-two"></div>
+              <div class="globe-core"></div>
+              <button class="globe-marker marker-one" type="button">Elysium</button>
+              <button class="globe-marker marker-two" type="button">Jezero</button>
+              <button class="globe-marker marker-three" type="button">Olympus</button>
+            </div>
+
+            <div class="globe-sidebar">
+              <div class="globe-panel">
+                <span class="chip">Airlock</span>
+                <h4>Ice-dense corridor</h4>
+                <p>High-confidence route for a short-field EVA with low dust agitation and strong thermal stability.</p>
+              </div>
+              <div class="globe-panel">
+                <span class="chip">Risk</span>
+                <h4>Moderate exposure</h4>
+                <p>Surface winds remain elevated near the ridge line, but mission planners rate the route as viable.</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="route-panel container reveal" id="route-planning">

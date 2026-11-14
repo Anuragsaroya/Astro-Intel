@@ -225,6 +225,7 @@ a {
   border-radius: 28px;
   background: linear-gradient(180deg, rgba(18, 36, 48, 0.96), rgba(10, 21, 28, 0.9));
   box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
 }
 
 .card-header {
@@ -312,7 +313,8 @@ a {
 }
 
 .stat-card,
-.insight-card {
+.insight-card,
+.globe-panel {
   border-radius: 20px;
   border: 1px solid var(--line);
   background: rgba(12, 25, 35, 0.86);
@@ -332,6 +334,112 @@ a {
 .stat-card h3 {
   margin: 16px 0 10px;
   font-size: clamp(1.5rem, 2vw, 2.1rem);
+}
+
+.globe-section {
+  margin-top: 56px;
+}
+
+.globe-wrapper {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.mars-globe {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 440px;
+  border-radius: 32px;
+  border: 1px solid var(--line);
+  background: radial-gradient(circle at top, rgba(92, 153, 255, 0.14), rgba(8, 20, 29, 0.9) 58%);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  perspective: 1200px;
+}
+
+.globe-core {
+  position: relative;
+  width: min(62vw, 300px);
+  height: min(62vw, 300px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f7b69e, #dd6b3d 25%, #8d3d2e 48%, #3d1c1d 72%, #180d11 100%);
+  box-shadow: inset -30px -20px 40px rgba(44, 17, 9, 0.7), 0 0 60px rgba(226, 120, 59, 0.25);
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.2s ease-out;
+}
+
+.globe-core::before,
+.globe-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.globe-core::before {
+  background: linear-gradient(120deg, rgba(255,255,255,0.18), transparent 38%, rgba(0,0,0,0.16));
+}
+
+.globe-core::after {
+  inset: 14%;
+  background: repeating-radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), rgba(255,255,255,0.08) 9px, transparent 10px, transparent 24px);
+  opacity: 0.7;
+}
+
+.globe-orbit {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(148, 201, 255, 0.28);
+  border-radius: 50%;
+  transform: rotateX(70deg);
+}
+
+.orbit-two {
+  width: 430px;
+  height: 430px;
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.globe-marker {
+  position: absolute;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  background: rgba(8, 20, 30, 0.7);
+  color: var(--text);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.marker-one { top: 22%; left: 18%; }
+.marker-two { top: 52%; right: 18%; }
+.marker-three { bottom: 18%; left: 44%; }
+
+.globe-sidebar {
+  display: grid;
+  gap: 18px;
+}
+
+.globe-panel {
+  padding: 22px 20px;
+}
+
+.globe-panel h4 {
+  margin: 16px 0 10px;
+  font-size: 1.5rem;
+}
+
+.globe-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .route-panel,
@@ -490,7 +598,8 @@ a {
   .hero,
   .route-grid,
   .insight-grid,
-  .mission-stats {
+  .mission-stats,
+  .globe-wrapper {
     grid-template-columns: 1fr;
   }
 
@@ -524,5 +633,10 @@ a {
 
   .nav-cta {
     width: 100%;
+  }
+
+  .globe-core {
+    width: min(72vw, 260px);
+    height: min(72vw, 260px);
   }
 }

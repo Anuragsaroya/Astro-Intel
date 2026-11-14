@@ -30,7 +30,7 @@ const observer = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
 
-const heroCard = document.querySelector('.orbit-card');
+const heroCard = document.getElementById('orbitalCard');
 if (heroCard) {
   heroCard.addEventListener('pointermove', (event) => {
     const rect = heroCard.getBoundingClientRect();
@@ -42,5 +42,40 @@ if (heroCard) {
 
   heroCard.addEventListener('pointerleave', () => {
     heroCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+  });
+}
+
+const marsGlobe = document.getElementById('marsGlobe');
+if (marsGlobe) {
+  let currentX = 0;
+  let currentY = 0;
+
+  const applyTilt = () => {
+    marsGlobe.style.setProperty('--tilt-x', `${currentX}deg`);
+    marsGlobe.style.setProperty('--tilt-y', `${currentY}deg`);
+  };
+
+  marsGlobe.addEventListener('pointermove', (event) => {
+    const rect = marsGlobe.getBoundingClientRect();
+    const offsetX = ((event.clientX - rect.left) / rect.width - 0.5) * 18;
+    const offsetY = ((event.clientY - rect.top) / rect.height - 0.5) * -18;
+
+    currentX = offsetY;
+    currentY = offsetX;
+    applyTilt();
+  });
+
+  marsGlobe.addEventListener('pointerleave', () => {
+    currentX = 0;
+    currentY = 0;
+    applyTilt();
+  });
+
+  const markers = marsGlobe.querySelectorAll('.globe-marker');
+  markers.forEach((marker) => {
+    marker.addEventListener('click', () => {
+      markers.forEach((item) => item.classList.remove('active'));
+      marker.classList.add('active');
+    });
   });
 }
